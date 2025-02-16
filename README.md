@@ -23,5 +23,7 @@ The current clang version fails to compile this library, so downgrade temporary 
 
 ## VsCode
 
-Ctrl + Shift + P
-Python: select interpreter
+> Ctrl + Shift + P
+> Python: select interpreter
+
+And then just select the correct environment
