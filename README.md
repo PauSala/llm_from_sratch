@@ -29,3 +29,7 @@ The current clang version fails to compile this library, so downgrade temporary 
 > Python: select interpreter
 
 And then just select the correct environment
+
+## Llama (on MacOS) for transforming a model to a GGUF format.
+
+brew install llama.cpp

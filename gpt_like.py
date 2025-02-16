@@ -5,15 +5,16 @@ print(sys.executable)
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+import pickle
 
 device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 print(f'Device :{device}')
 
 # Parameters
-block_size = 16
-batch_size = 32
+block_size = 8
+batch_size = 16
 max_iters = 1000
-learning_rate = 3e-4
+learning_rate = 3e-3
 eval_iters = 100
 dropout= 0.2
 n_embd = 100 # why?
@@ -203,37 +204,38 @@ class GPTLanguageModel(nn.Module):
     
 
 
-# Initialize and Train the model
+def train(model):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+    for item in range(max_iters):
+        if item % eval_iters == 0:
+            losses = estimate_loss(model)
+            print(f"step: {item}\t | train_loss: {losses['train']:.4f} | val_loss: {losses['val']:.4f}")
+        # sample batch of data
+        xb, yb = get_batch('train')
 
-model = GPTLanguageModel(vocab_size)
-m = model.to(device)
-context = torch.zeros((1, 1), dtype=torch.long, device=device)
-print(context)
+        # evaluate loss
+        logits, loss = model.forward(xb, yb)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
 
+# Initialize and Train the model ---------------------------------------------------------------------
 
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+# model = GPTLanguageModel(vocab_size)
+# m = model.to(device)
+# train(m)
+# # save the model
+# # with open('gpt-01.pkl', 'wb') as f:
+# #     pickle.dump(m, f)
+# torch.save(model.state_dict(), 'gpt1')
 
-for item in range(max_iters):
-    if item % eval_iters == 0:
-        losses = estimate_loss(model)
-        print(f"step: {item}\t | train_loss: {losses['train']:.4f} | val_loss: {losses['val']:.4f}")
-    # sample batch of data
-    xb, yb = get_batch('train')
+# Use the model to perform predictions ----------------------------------------------------------------
 
-    # evaluate loss
-    logits, loss = model.forward(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
+# context = torch.tensor(encode('2 x 3 ='))
 
+# # Reshape to the desired shape (1, 1)
+# context = context.unsqueeze(0) # Adds two dimensions
+# context = context.to(device)
 
-# Use the model to perform predictions
-
-context = torch.tensor(encode('2 x 3 ='))
-
-# Reshape to the desired shape (1, 1)
-context = context.unsqueeze(0) # Adds two dimensions
-context = context.to(device)
-
-generated_chars = decode(m.generate(context, max_new_tokens=2)[0].tolist())
-print(generated_chars)
+# generated_chars = decode(m.generate(context, max_new_tokens=2)[0].tolist())
+# print(generated_chars)
