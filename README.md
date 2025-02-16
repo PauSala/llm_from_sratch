@@ -1,5 +1,7 @@
 # LLM from scratch
 
+Based on [this](https://www.youtube.com/watch?v=UU1WVnMk4E8&t=18508s) FreeCodeCamp course
+
 ## Activate env
 
 conda activate llmfs
